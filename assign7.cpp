@@ -16,27 +16,20 @@ int main(int argc, char *argv[])
     char *fileText;
     bool fileClear = false;
     
-    // assign arguments to variable
-    for (int i = 1; i < argc; i++)
+    if (strcmp(argv[2], "-c") == 0)
     {
-        // if -c option then set file to clear
-        if (strcmp(argv[i], "-c") == 0)
-        {
-            fileClear = true;
-            cout << "File clear? : " << fileClear << endl;
-        }
-        // if file text then set to variable
-        else if (strcmp(argv[i], '\"') == 0)
-        {
-            fileText = argv[i];
-            cout << "File text: " << fileText << endl;
-        }
-        // else it must be the filename
-        else
-        {
-            fileName = argv[i];
-            cout << "File name: " << fileName << endl;
-        }
+        fileClear = true;
+        fileName = argv[2];
+        fileText = argv[3];
+        cout << "File name is argv[2]: " << fileName << endl;
+        cout << "File name is argv[3]: " << fileText << endl;
+    }    
+    else
+    {
+        fileName = argv[1];
+        fileText = argv[2];
+        cout << "File name is argv[1]: " << fileName << endl;
+        cout << "File text is argv[2]: " << fileText << endl;
     }
 
      /*
@@ -45,7 +38,6 @@ int main(int argc, char *argv[])
      * OPENING AND WRITING - BELOW 
      *
      */
-
     // load file name
     int fd, count;
 
@@ -59,7 +51,7 @@ int main(int argc, char *argv[])
     
     // write to file
     //count = write(fd, fileText, sizeof(fileText)); 
-    write(fd, fileText, sizeof(fileText)); 
+    write(fd, fileText, sizeof(fileText-2)); 
     if (fd < 0)
     {
         perror("File could not be written to.");
@@ -70,7 +62,6 @@ int main(int argc, char *argv[])
 
     // close file
     close(fd);
-
 
     /*
      *
@@ -94,7 +85,7 @@ int main(int argc, char *argv[])
 	if (S_IRUSR & buffer.st_mode) cout << "... owner can read\n";
 	if (S_ISREG(buffer.st_mode))  cout << "... is a file\n";	
 	if (S_ISDIR(buffer.st_mode))  cout << "... is a directory\n";
-	
+
     return 0;
 
 }

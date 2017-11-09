@@ -24,14 +24,7 @@ int main(int argc, char *argv[])
     char *fileName;
     char *fileText;
     bool fileClear = false;
-    bool fileExists = false;
 
-    int rs;
-    struct stat buffer;
-    // call stat system call
-    rs = stat(fileName, &buffer);
-    
-    cout << rs << endl;
 
     // if user just runs file it will output instructions
     if (argc == 1)
@@ -55,12 +48,11 @@ int main(int argc, char *argv[])
         fileText = argv[2];
     }
 
-
-
-
-
-
-
+     int rs;
+     struct stat buffer;
+     // call stat system call
+     rs = stat(fileName, &buffer);
+     cout << rs << endl;
 
 
 
@@ -77,6 +69,8 @@ int main(int argc, char *argv[])
     // if file clear ( -c ) then run the logic for creating a fresh file
     if (fileClear == 1) 
     {
+        cout << "Run 1" << endl;
+
         // load file name
         int fd, count;
 
@@ -93,6 +87,8 @@ int main(int argc, char *argv[])
         
         // write to file
         count = write(fd, fileText, strlen(fileText)); 
+        write(fd, "\n", sizeof("\n"));
+
         if (fd < 0)
         {
             perror(fileName);
@@ -107,6 +103,8 @@ int main(int argc, char *argv[])
     // if file needs to be created and not appened
     else if (rs < 0)
     {
+        cout << "Run 2" << endl;
+
         // load file name
         int fd, count;
 
@@ -123,6 +121,7 @@ int main(int argc, char *argv[])
         
         // write to file
         count = write(fd, fileText, strlen(fileText)); 
+        write(fd, "\n", sizeof("\n"));
         if (fd < 0)
         {
             perror(fileName);
@@ -136,7 +135,8 @@ int main(int argc, char *argv[])
     // if file needs to be appended and not created 
     else 
     {
-        cout << S_ISREG(buffer.st_mode) << endl;
+        cout << "Run 3" << endl;
+
         int fd, count;
 
         chmod(fileName, 00700);
@@ -148,6 +148,8 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
         count = write(fd, fileText, strlen(fileText));
+        write(fd, "\n", sizeof("\n"));
+
         if ( fd < 0)
         {
             perror(fileName);

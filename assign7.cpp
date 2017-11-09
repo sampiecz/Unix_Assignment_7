@@ -15,12 +15,13 @@ int main(int argc, char *argv[])
     char *fileName;
     char *fileText;
     bool fileClear = false;
-    
-    if (strcmp(argv[2], "-c") == 0)
+
+    if (strcmp(argv[1], "-c") == 0)
     {
         fileClear = true;
         fileName = argv[2];
         fileText = argv[3];
+        cout << "File should be cleared: " << fileClear << endl;
         cout << "File name is argv[2]: " << fileName << endl;
         cout << "File name is argv[3]: " << fileText << endl;
     }    
@@ -28,48 +29,61 @@ int main(int argc, char *argv[])
     {
         fileName = argv[1];
         fileText = argv[2];
+        cout << "File should be cleared: " << fileClear << endl;
         cout << "File name is argv[1]: " << fileName << endl;
         cout << "File text is argv[2]: " << fileText << endl;
     }
 
-     /*
+    /*
      *
      *
      * OPENING AND WRITING - BELOW 
      *
      */
-    // load file name
-    int fd, count;
-
-    // open existing file, will overwrite current content
-    fd = creat(fileName, 0);
-    if (fd < 0)
+    if (fileClear == 1)
     {
-        perror(fileName);
-        exit(EXIT_FAILURE);
+        // load file name
+        int fd, count;
+
+        // open existing file, will overwrite current content
+        
+        fd = creat(fileName, 0);
+
+        if (fd < 0)
+        {
+            perror(fileName);
+            exit(EXIT_FAILURE);
+        }
+        
+        // write to file
+        count = write(fd, fileText, sizeof(fileText)); 
+        if (fd < 0)
+        {
+            perror("File could not be written to.");
+            exit(fd);
+        }
+
+        cout << "wrote " << count << " bytes to file\n";
+
+        // close file
+        close(fd);
     }
+    else
+    {
+        // Do append to file stuff here 
+    }
+
+
+
+    // Next I should probably do the chmod stuff
+    // Change permissions back to unwritable
     
-    // write to file
-    //count = write(fd, fileText, sizeof(fileText)); 
-    write(fd, fileText, sizeof(fileText-2)); 
-    if (fd < 0)
-    {
-        perror("File could not be written to.");
-        exit(fd);
-    }
-
-    cout << "wrote " << count << " bytes to file\n";
-
-    // close file
-    close(fd);
-
     /*
-     *
      *
      * STAT - BELOW 
      *
-     *
      */
+    
     int rs;
 	struct stat buffer;
 	// call stat system call

@@ -11,22 +11,40 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+    /***********************************************************
+     *
+     *
+     *         Everything below this point assigns
+     *         necessary data to variables. 
+     *
+     *
+     ***********************************************************/
+
     // create variables for argv elements to be assigned to
     char *fileName;
     char *fileText;
     bool fileClear = false;
-    
+    bool fileExists = false;
+
     int rs;
     struct stat buffer;
     // call stat system call
     rs = stat(fileName, &buffer);
     
+    if (S_ISREG(buffer.st_mode) == 0)
+    {
+        fileExists = true;
+    }
+
+    cout << "fileExists: " << fileExists << endl;
+
     // if user just runs file it will output instructions
     if (argc == 1)
     {
         cout << "Usage: seclog [-c] out_file message_string" << endl;
         cout << "\twhere the message_string is appended to file out_file." << endl;
         cout << "\tThe -c option clears the file before the message is appended" << endl;
+        return 0;
     }
     // if user puts -c option then set fileClear to true
     else if (strcmp(argv[1], "-c") == 0)
@@ -34,24 +52,26 @@ int main(int argc, char *argv[])
         fileClear = true;
         fileName = argv[2];
         fileText = argv[3];
-        cout << "File should be cleared: " << fileClear << endl;
-        cout << "File name is argv[2]: " << fileName << endl;
-        cout << "File text is argv[3]: " << fileText << endl;
     }    
     // otherwise just set variables and leave fileClear to false
     else
     {
         fileName = argv[1];
         fileText = argv[2];
-        cout << "File should be cleared: " << fileClear << endl;
-        cout << "File name is argv[1]: " << fileName << endl;
-        cout << "File text is argv[2]: " << fileText << endl;
     }
 
-    // if file clear then run the logic for creating a fresh file
-    if (fileClear == true) 
+    /***********************************************************
+     *
+     *
+     *         Everything below this point decides
+     *         how the file will be saved. 
+     *
+     *
+     ***********************************************************/
+
+    // if file clear ( -c ) then run the logic for creating a fresh file
+    if (fileClear == 1) 
     {
-        cout << "Route 1" << endl;
         // load file name
         int fd, count;
 
@@ -79,9 +99,9 @@ int main(int argc, char *argv[])
         // close file
         close(fd);       
     }
-    else if (S_ISREG(buffer.st_mode) == false)
+    // if file needs to be created and not appened
+    else if (fileExists == 1)
     {
-        cout << "Route 2" << endl;
         // load file name
         int fd, count;
 
@@ -108,17 +128,16 @@ int main(int argc, char *argv[])
         // close file
         close(fd);    
     }
-    // Otherwise just go ahead and append the text to the file
-    else
+    // if file needs to be appended and not created 
+    else if (fileExists == 0)
     {
-        cout << "Route 3" << endl;
-
+        cout << S_ISREG(buffer.st_mode) << endl;
         int fd, count;
 
         chmod(fileName, 00700);
 
         // Do append to file stuff here 
-        fd = open(fileName, O_WRONLY | O_APPEND );
+        fd = open(fileName, O_WRONLY | O_APPEND);
         {
             perror(fileName);
             exit(EXIT_FAILURE);

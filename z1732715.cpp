@@ -31,12 +31,7 @@ int main(int argc, char *argv[])
     // call stat system call
     rs = stat(fileName, &buffer);
     
-    if (S_ISREG(buffer.st_mode) == 0)
-    {
-        fileExists = true;
-    }
-
-    cout << "fileExists: " << fileExists << endl;
+    cout << rs << endl;
 
     // if user just runs file it will output instructions
     if (argc == 1)
@@ -59,6 +54,16 @@ int main(int argc, char *argv[])
         fileName = argv[1];
         fileText = argv[2];
     }
+
+
+
+
+
+
+
+
+
+
 
     /***********************************************************
      *
@@ -100,7 +105,7 @@ int main(int argc, char *argv[])
         close(fd);       
     }
     // if file needs to be created and not appened
-    else if (fileExists == 1)
+    else if (rs < 0)
     {
         // load file name
         int fd, count;
@@ -129,7 +134,7 @@ int main(int argc, char *argv[])
         close(fd);    
     }
     // if file needs to be appended and not created 
-    else if (fileExists == 0)
+    else 
     {
         cout << S_ISREG(buffer.st_mode) << endl;
         int fd, count;

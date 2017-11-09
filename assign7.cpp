@@ -15,8 +15,17 @@ int main(int argc, char *argv[])
     char *fileName;
     char *fileText;
     bool fileClear = false;
+    int sizeOfText = sizeof(*fileText);
 
-    if (strcmp(argv[1], "-c") == 0)
+    
+
+    if (argc == 1)
+    {
+        cout << "Usage: seclog [-c] out_file message_string" << endl;
+        cout << "\twhere the message_string is appended to file out_file." << endl;
+        cout << "\tThe -c option clears the file before the message is appended" << endl;
+    }
+    else if (strcmp(argv[1], "-c") == 0)
     {
         fileClear = true;
         fileName = argv[2];
@@ -24,6 +33,7 @@ int main(int argc, char *argv[])
         cout << "File should be cleared: " << fileClear << endl;
         cout << "File name is argv[2]: " << fileName << endl;
         cout << "File name is argv[3]: " << fileText << endl;
+        cout << "Size of text is: " << sizeOfText << endl;
     }    
     else
     {
@@ -32,6 +42,7 @@ int main(int argc, char *argv[])
         cout << "File should be cleared: " << fileClear << endl;
         cout << "File name is argv[1]: " << fileName << endl;
         cout << "File text is argv[2]: " << fileText << endl;
+        cout << "Size of text is: " << sizeOfText << endl;
     }
 
     /*
@@ -56,7 +67,7 @@ int main(int argc, char *argv[])
         }
         
         // write to file
-        count = write(fd, fileText, sizeof(fileText)); 
+        count = write(fd, fileText, sizeof(&fileText)); 
         if (fd < 0)
         {
             perror("File could not be written to.");
@@ -87,13 +98,13 @@ int main(int argc, char *argv[])
     int rs;
 	struct stat buffer;
 	// call stat system call
-	rs = stat(argv[1], &buffer);
+	rs = stat(fileName, &buffer);
 	if (rs == -1) {
-		perror(argv[1]);
+		perror(fileName);
 		exit(EXIT_FAILURE);
 	}
 	// print results
-	cout << "status report: " << argv[1] << endl;
+	cout << "status report: " << fileName << endl;
 	cout << "... size: " << buffer.st_size << endl;
 	cout << "... owner: " << buffer.st_uid << endl;	
 	if (S_IRUSR & buffer.st_mode) cout << "... owner can read\n";

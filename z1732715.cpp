@@ -11,17 +11,24 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    // initialize variables 
+    // create variables for argv elements to be assigned to
     char *fileName;
     char *fileText;
     bool fileClear = false;
-
+    
+    int rs;
+    struct stat buffer;
+    // call stat system call
+    rs = stat(fileName, &buffer);
+    
+    // if user just runs file it will output instructions
     if (argc == 1)
     {
         cout << "Usage: seclog [-c] out_file message_string" << endl;
         cout << "\twhere the message_string is appended to file out_file." << endl;
         cout << "\tThe -c option clears the file before the message is appended" << endl;
     }
+    // if user puts -c option then set fileClear to true
     else if (strcmp(argv[1], "-c") == 0)
     {
         fileClear = true;
@@ -31,6 +38,7 @@ int main(int argc, char *argv[])
         cout << "File name is argv[2]: " << fileName << endl;
         cout << "File text is argv[3]: " << fileText << endl;
     }    
+    // otherwise just set variables and leave fileClear to false
     else
     {
         fileName = argv[1];
@@ -40,12 +48,14 @@ int main(int argc, char *argv[])
         cout << "File text is argv[2]: " << fileText << endl;
     }
 
-    // This if statement just creates a new file and writes to it
-    if (fileClear == 1)
+    // if file clear then run the logic for creating a fresh file
+    if (fileClear == true) 
     {
+        cout << "Route 1" << endl;
         // load file name
         int fd, count;
 
+        chmod(fileName, 00700);
         // open existing file, will overwrite current content
         
         fd = creat(fileName, O_WRONLY);
@@ -60,23 +70,55 @@ int main(int argc, char *argv[])
         count = write(fd, fileText, strlen(fileText)); 
         if (fd < 0)
         {
-            perror("File could not be written to.");
+            perror(fileName);
             exit(fd);
         }
 
-        cout << "wrote " << count << " bytes to file\n";
+        chmod(fileName, 00000);
 
         // close file
-        close(fd);
+        close(fd);       
     }
-    // This else statement appends the text to a file
-    else
+    else if (S_ISREG(buffer.st_mode) == false)
     {
+        cout << "Route 2" << endl;
+        // load file name
         int fd, count;
 
+        chmod(fileName, 00700);
+        // open existing file, will overwrite current content
+        
+        fd = creat(fileName, O_WRONLY);
+
+        if (fd < 0)
+        {
+            perror(fileName);
+            exit(EXIT_FAILURE);
+        }
+        
+        // write to file
+        count = write(fd, fileText, strlen(fileText)); 
+        if (fd < 0)
+        {
+            perror(fileName);
+            exit(fd);
+        }
+
+        chmod(fileName, 00000);
+        // close file
+        close(fd);    
+    }
+    // Otherwise just go ahead and append the text to the file
+    else
+    {
+        cout << "Route 3" << endl;
+
+        int fd, count;
+
+        chmod(fileName, 00700);
+
         // Do append to file stuff here 
-        fd = open(fileName, O_WRONLY | O_APPEND);
-        if ( fd < 0)
+        fd = open(fileName, O_WRONLY | O_APPEND );
         {
             perror(fileName);
             exit(EXIT_FAILURE);
@@ -84,37 +126,14 @@ int main(int argc, char *argv[])
         count = write(fd, fileText, strlen(fileText));
         if ( fd < 0)
         {
-            perror("Could not write to file.");
+            perror(fileName);
             exit(EXIT_FAILURE);
-        }
+        }   
+
+        chmod(fileName, 00000);
+
+        close(fd);
     }
-
-
-
-    // Next I should probably do the chmod stuff
-    // Change permissions back to unwritable
-   /* 
-     *
-     * STAT - BELOW 
-     *
-    
-    int rs;
-	struct stat fileText;
-	// call stat system call
-	rs = stat(fileName, &fileText);
-	if (rs == -1) {
-		perror(fileName);
-		exit(EXIT_FAILURE);
-	}
-	// print results
-	cout << "status report: " << fileName << endl;
-	cout << "... size: " << fileText.st_size << endl;
-	cout << "... owner: " << fileText.st_uid << endl;	
-	if (S_IRUSR & fileText.st_mode) cout << "... owner can read\n";
-	if (S_ISREG(fileText.st_mode))  cout << "... is a file\n";	
-	if (S_ISDIR(fileText.st_mode))  cout << "... is a directory\n";
-    */
-
-    return 0;
+   return 0;
 
 }

@@ -15,9 +15,6 @@ int main(int argc, char *argv[])
     char *fileName;
     char *fileText;
     bool fileClear = false;
-    int sizeOfText = sizeof(*fileText);
-
-    
 
     if (argc == 1)
     {
@@ -32,8 +29,7 @@ int main(int argc, char *argv[])
         fileText = argv[3];
         cout << "File should be cleared: " << fileClear << endl;
         cout << "File name is argv[2]: " << fileName << endl;
-        cout << "File name is argv[3]: " << fileText << endl;
-        cout << "Size of text is: " << sizeOfText << endl;
+        cout << "File text is argv[3]: " << fileText << endl;
     }    
     else
     {
@@ -42,15 +38,9 @@ int main(int argc, char *argv[])
         cout << "File should be cleared: " << fileClear << endl;
         cout << "File name is argv[1]: " << fileName << endl;
         cout << "File text is argv[2]: " << fileText << endl;
-        cout << "Size of text is: " << sizeOfText << endl;
     }
 
-    /*
-     *
-     *
-     * OPENING AND WRITING - BELOW 
-     *
-     */
+    // This if statement just creates a new file and writes to it
     if (fileClear == 1)
     {
         // load file name
@@ -58,7 +48,7 @@ int main(int argc, char *argv[])
 
         // open existing file, will overwrite current content
         
-        fd = creat(fileName, 0);
+        fd = creat(fileName, O_WRONLY);
 
         if (fd < 0)
         {
@@ -67,7 +57,7 @@ int main(int argc, char *argv[])
         }
         
         // write to file
-        count = write(fd, fileText, sizeof(&fileText)); 
+        count = write(fd, fileText, strlen(fileText)); 
         if (fd < 0)
         {
             perror("File could not be written to.");
@@ -79,37 +69,51 @@ int main(int argc, char *argv[])
         // close file
         close(fd);
     }
+    // This else statement appends the text to a file
     else
     {
+        int fd, count;
+
         // Do append to file stuff here 
+        fd = open(fileName, O_WRONLY | O_APPEND);
+        if ( fd < 0)
+        {
+            perror(fileName);
+            exit(EXIT_FAILURE);
+        }
+        count = write(fd, fileText, strlen(fileText));
+        if ( fd < 0)
+        {
+            perror("Could not write to file.");
+            exit(EXIT_FAILURE);
+        }
     }
 
 
 
     // Next I should probably do the chmod stuff
     // Change permissions back to unwritable
-    
-    /*
+   /* 
      *
      * STAT - BELOW 
      *
-     */
     
     int rs;
-	struct stat buffer;
+	struct stat fileText;
 	// call stat system call
-	rs = stat(fileName, &buffer);
+	rs = stat(fileName, &fileText);
 	if (rs == -1) {
 		perror(fileName);
 		exit(EXIT_FAILURE);
 	}
 	// print results
 	cout << "status report: " << fileName << endl;
-	cout << "... size: " << buffer.st_size << endl;
-	cout << "... owner: " << buffer.st_uid << endl;	
-	if (S_IRUSR & buffer.st_mode) cout << "... owner can read\n";
-	if (S_ISREG(buffer.st_mode))  cout << "... is a file\n";	
-	if (S_ISDIR(buffer.st_mode))  cout << "... is a directory\n";
+	cout << "... size: " << fileText.st_size << endl;
+	cout << "... owner: " << fileText.st_uid << endl;	
+	if (S_IRUSR & fileText.st_mode) cout << "... owner can read\n";
+	if (S_ISREG(fileText.st_mode))  cout << "... is a file\n";	
+	if (S_ISDIR(fileText.st_mode))  cout << "... is a directory\n";
+    */
 
     return 0;
 
